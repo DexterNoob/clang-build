@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+export TELEGRAM_TOKEN=""
+export TELEGRAM_CHAT=""
+export BRANCH=""
+export GIT_TOKEN=""
+
 # Function to show an informational message
 msg() {
     echo -e "\e[1;32m$*\e[0m"
@@ -42,7 +47,7 @@ msg "Building LLVM..."
 send_msg "<b>Clang build started on <code>[ $BRANCH ]</code> branch</b>"
 ./build-llvm.py \
     --branch "$BRANCH" \
-    --clang-vendor "WeebX" \
+    --clang-vendor "Phoenix" \
     --defines LLVM_PARALLEL_COMPILE_JOBS=$(nproc) LLVM_PARALLEL_LINK_JOBS=$(nproc) CMAKE_C_FLAGS=-O3 CMAKE_CXX_FLAGS=-O3 \
     --no-ccache \
     --project "clang;compiler-rt;lld;polly;openmp" \
@@ -93,13 +98,13 @@ llvm_commit_url="https://github.com/llvm/llvm-project/commit/$short_llvm_commit"
 binutils_ver="$(ls | grep "^binutils-" | sed "s/binutils-//g")"
 clang_version="$(install/bin/clang --version | head -n1 | cut -d' ' -f4)"
 build_date="$(TZ=Asia/Jakarta date +"%Y-%m-%d")"
-tags="WeebX-Clang-$clang_version-release"
-file="WeebX-Clang-$clang_version.tar.gz"
-clang_link="https://github.com/XSans0/WeebX-Clang/releases/download/$tags/$file"
+tags="Phoenix-Clang-$clang_version-release"
+file="Phoenix-Clang-$clang_version.tar.gz"
+clang_link="https://github.com/DexterNoob/phoenix-clang/releases/download/$tags/$file"
 
 # Git Config
-git config --global user.name "XSans0"
-git config --global user.email "xsansdroid@gmail.com"
+git config --global user.name "dexternoob"
+git config --global user.email "noobbeastdext@gmail.com"
 
 pushd install || exit
 {
@@ -113,7 +118,7 @@ tar -czvf ../"$file" .
 popd || exit
 
 # Push
-git clone "https://XSans0:$GIT_TOKEN@github.com/XSans0/WeebX-Clang.git" rel_repo
+git clone "https://DexterNoob:$GIT_TOKEN@github.com/DexterNoob/phoenix-clang.git" rel_repo
 pushd rel_repo || exit
 if [ -d "$BRANCH" ]; then
     echo "$clang_link" >"$BRANCH"/link.txt
@@ -124,7 +129,7 @@ else
     cp -r ../install/README.md "$BRANCH"
 fi
 git add .
-git commit -asm "WeebX-Clang-$clang_version: $(TZ=Asia/Jakarta date +"%Y%m%d")"
+git commit -asm "Phoenix-clang-$clang_version: $(TZ=Asia/Jakarta date +"%Y%m%d")"
 git push -f origin main
 
 # Check tags already exists or not
@@ -137,15 +142,15 @@ failed=n
 if [ "$overwrite" == "y" ]; then
     ./github-release edit \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "dexternoob" \
+        --repo "Phoenix-Clang" \
         --tag "$tags" \
         --description "$(cat install/README.md)"
 
     ./github-release upload \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "dexternoob" \
+        --repo "Phoenix-Clang" \
         --tag "$tags" \
         --name "$file" \
         --file "$file" \
@@ -153,15 +158,15 @@ if [ "$overwrite" == "y" ]; then
 else
     ./github-release release \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "dexternoob" \
+        --repo "Phoenix-Clang" \
         --tag "$tags" \
         --description "$(cat install/README.md)"
 
     ./github-release upload \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "dexternoob" \
+        --repo "Phoenix-Clang" \
         --tag "$tags" \
         --name "$file" \
         --file "$file" || failed=y
@@ -173,8 +178,8 @@ while [ "$failed" == "y" ]; do
     msg "* Upload again"
     ./github-release upload \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "dexternoob" \
+        --repo "Phoenix-Clang" \
         --tag "$tags" \
         --name "$file" \
         --file "$file" \
@@ -194,5 +199,5 @@ send_msg "
 <b>Compile Based : </b>
 * <a href='$llvm_commit_url'>$llvm_commit_url</a>
 <b>Push Repository : </b>
-* <a href='https://github.com/XSans0/WeebX-Clang.git'>WeebX-Clang</a>
+* <a href='https://github.com/DexterNoob/phoenix-clang.git'>Phoenix-Clang</a>
 <b>--------------------------------------------------</b>"
